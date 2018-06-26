@@ -2,7 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import RedBox from 'redbox-react';
 
-import socket from "./services/socket";
+import './services/socket';
 
 import App from './modules/App';
 
