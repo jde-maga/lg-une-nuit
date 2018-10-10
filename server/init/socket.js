@@ -1,24 +1,32 @@
-const socketio = require('socket.io');
+const socketio = require("socket.io");
 
-const server = require('./server');
+const server = require("./server");
 
 const io = socketio(server);
 
-io.on('connection', (socket) => {
-  const userData = {};
+const GameBoard = require("./GameBoard");
 
-  socket.on('newUser', (user) => {
-    if (typeof (user) !== 'string' || user.length < 3) {
-      console.log("ko", user)
-      return socket.emit('newUser_KO');
+let Board = null;
+const lobby = [];
+
+io.on("connection", socket => {
+  io.emit("refreshLobby", lobby);
+
+  socket.on("newUser", user => {
+    if (typeof user !== "string" || user.length < 3) {
+      return socket.emit("newUser_KO");
     }
 
-    userData.name = user;
-    userData.id = socket.id;
-
-    console.log("ok")
-    return socket.emit('newUser_OK');
+    lobby.push(user);
+    io.emit("refreshLobby", lobby);
+    return socket.emit("newUser_OK", lobby);
   });
 
-  console.log('now listening sockets');
+  socket.on("startingGame", () => {
+    Board = new GameBoard(lobby);
+    Board.generateRoles();
+    io.emit("gameStart");
+  });
+
+  console.log("now listening sockets");
 });
